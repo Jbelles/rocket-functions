@@ -1,6 +1,7 @@
 ﻿//Created: 2-15-2018 by Jarret Belles
 //This is a sample console application that can stream new operations on the stellar network using the .Net Core Stellar SDK.
 //This app watches for a successful inflation operation, calculates the earnings of each member of the owner's pool, and pays them out.
+//THE DATABASE THAT WE CONNECT TO IS EXPECTED TO BE AN INSTANCE OF STELLAR CORE
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using Rocket.Common.Responses;
@@ -28,7 +29,8 @@ namespace TestConsole
 
         public static void Main(string[] args)
         {
-            //Build configuration from appsettings
+            //Build configuration from appsettings.json
+            //There are also some commented out lines showing a different way of retreiving credentials
             string path = Directory.GetCurrentDirectory();
             var builder = new ConfigurationBuilder()
             .SetBasePath(path)
@@ -36,19 +38,22 @@ namespace TestConsole
 
             Configuration = builder.Build();
             Network.UseTestNetwork();
-            Network.UsePublicNetwork();
+            //Network.UsePublicNetwork();
             
             Console.WriteLine("-- Streaming All New Operations On The Network --");
 
             //Begin streaming operations
+            //These can be customized to limit operations (from a particular account specifically for example)
             server.Operations
                 .Cursor("now")
+                //.ForAccount(Some Keypair) If you wanted to specify operations for an account
                 .Stream((sender, response) => { ShowOperationResponse(response); })
                 .Connect();
 
             Console.ReadLine();
         }
 
+        //Execute whatever logic you want based on the type of operation you are expecting here.
         private static async void ShowOperationResponse(OperationResponse op)
         {
             if (op is CreateAccountOperationResponse)
@@ -90,28 +95,34 @@ namespace TestConsole
             else if (op is InflationOperationResponse)
             {
                 Console.WriteLine($"Hey I'm an Inflation Operation: {op.Id}");
+
+                //Determine what pools were paid out this week + how much
                 var effects = await server.Effects.ForOperation(op.Id).Execute();
+
+                //Check if any pools were granted inflation
                 if (effects.Records != null && effects.Records.Count > 0)
                 {
                     foreach (EffectResponse record in effects.Records)
                     {
                         Console.WriteLine(record.Account.AccountId + "earned inflation this week.");
 
-                        //CHECK IF YOUR POOL ACCOUNT IS THERE
+                        //check if your pool is in the list of valid pools
                         if (record.Account.AccountId == Configuration["INFLATION_POOL"])
                         //if (record.Account.AccountId == Environment.GetEnvironmentVariable("INFLATION_POOL"))
                         {
+                            //you've got inflation this week!
                             inflation_found = true;
                             if (record is AccountCreditedEffectResponse)
                             {
                                 Console.WriteLine($"Pool {record.Account.AccountId} was credited with { (record as AccountCreditedEffectResponse).Amount}XLM");
-                                //InflationAmount = double.Parse((record as AccountCreditedEffectResponse).Amount);
+                                //Time to pay out your voters!
                                 Payout(decimal.Parse((record as AccountCreditedEffectResponse).Amount));
                             }
                         }
                     }
                     if (!inflation_found)
                     {
+                        //your pool doesn't qualify for inflation yet
                         Console.WriteLine("Looks like the pool didn't earn inflation this week.");
                         Console.WriteLine($"See all valid pools here: https://horizon.stellar.org/operations/{op.Id}/effects");
                     }
@@ -132,14 +143,16 @@ namespace TestConsole
         {
             Network.UseTestNetwork();
 
+            //Get the number of votes you have
             var votes = GetTotalVotes();
+            //Get the accounts that voted for you and what you owe them
             var accounts = GetVoterAccounts(InflationAmount, votes);
 
             decimal sum = 0;
             decimal percentage = 0;
 
-            //KeyPair PoolSource = KeyPair.FromSecretSeed(Configuration["INFLATION_POOL_SECRET"]);
-            KeyPair PoolSource = KeyPair.FromSecretSeed(Environment.GetEnvironmentVariable("INFLATION_POOL_SECRET"));
+            KeyPair PoolSource = KeyPair.FromSecretSeed(Configuration["INFLATION_POOL_SECRET"]);
+            //KeyPair PoolSource = KeyPair.FromSecretSeed(Environment.GetEnvironmentVariable("INFLATION_POOL_SECRET"));
 
             AccountResponse sourceAccount = await server.Accounts.Account(PoolSource);
             var sequenceNumber = sourceAccount.SequenceNumber;
@@ -151,32 +164,41 @@ namespace TestConsole
             int batch = 0;
             foreach (var account in accounts)
             {
-                if (batch < 100)
-                {
-                    var payout = RoundDown(account.Payout, 7);
-                    var payoutPercent = RoundDown(account.Percentage, 7);
-                    var operation = new PaymentOperation.Builder(KeyPair.FromAccountId(account.AccountId), new AssetTypeNative(), (payout - .0000100m).ToString())
-                        .SetSourceAccount(PoolSource)
-                        .Build();
-                    BatchTransaction.AddOperation(operation);
+                //we can only have 100 operations per transaction, this means we need to split up our payouts every 100 people
+             
+                //Rounding down because we're greedy pigs that want to keep every last stroop
+                var payout = RoundDown(account.Payout, 7);
+                var payoutPercent = RoundDown(account.Percentage, 7);
+                //Create the payment operation, we are pulling the 100 stroop fee out of the receipients end.
+                //The lowest amount a voting account could possibly contain is 1 lumen
+                //1 lumen will earn 0.0001923 lumens per week, so we don't have to worry about the fee being larger than a potential earning!
+                var operation = new PaymentOperation.Builder(KeyPair.FromAccountId(account.AccountId), new AssetTypeNative(), (payout - .0000100m).ToString())
+                    .SetSourceAccount(PoolSource)
+                    .Build();
+                BatchTransaction.AddOperation(operation);
 
-                    Console.WriteLine($"Paying out: {payout}XLM (%{payoutPercent}) to Account: {account.AccountId}");
-                    sum += payout;
-                    percentage += payoutPercent;
-                }
+                Console.WriteLine($" Account: {account.AccountId} Earned: {payout}XLM (%{payoutPercent})");
+
+                //totalling up our payout/percentages
+                sum += payout;
+                percentage += payoutPercent;
+
                 if (batch == 99 || account.Equals(accounts.LastOrDefault()))
                 {
+                    //This batch is full! we sign it with a memo and our private key and add it to the list of to be processed outgoing transactions.
                     var t = BatchTransaction.AddMemo(Memo.Text($"Sample Memo")).Build();
                     t.Sign(PoolSource);
                     Transactions.Add(t);
                     BatchTransaction = new Transaction.Builder(PoolAccount);
                 }
+                //Reset the batch
                 batch = batch == 99 ? 0 : ++batch;
             }
 
             Console.WriteLine("Submitting batches to the stellar network...");
             foreach (var t in Transactions)
             {
+                //Submit each transaction to the network
                 Console.WriteLine($"Submitting batch: {Transactions.IndexOf(t) + 1}...");
                 var response = await server.SubmitTransaction(t);
                 Console.WriteLine($"Batch submitted.");
