@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2024
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rocket.Api", "rocket-wallet-api\Rocket.Api.csproj", "{3E66F467-EB17-4363-B390-F9299F362472}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rocket.Common", "Rocket.Common\Rocket.Common.csproj", "{AF045819-E923-439F-BBA4-34C25591AD55}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OperationStream", "InflationConsole\OperationStream.csproj", "{C22A1547-6F2F-47E6-8E49-B7CE4CF6CFD7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3E66F467-EB17-4363-B390-F9299F362472}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E66F467-EB17-4363-B390-F9299F362472}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E66F467-EB17-4363-B390-F9299F362472}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E66F467-EB17-4363-B390-F9299F362472}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF045819-E923-439F-BBA4-34C25591AD55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF045819-E923-439F-BBA4-34C25591AD55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF045819-E923-439F-BBA4-34C25591AD55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF045819-E923-439F-BBA4-34C25591AD55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C22A1547-6F2F-47E6-8E49-B7CE4CF6CFD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C22A1547-6F2F-47E6-8E49-B7CE4CF6CFD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C22A1547-6F2F-47E6-8E49-B7CE4CF6CFD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C22A1547-6F2F-47E6-8E49-B7CE4CF6CFD7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A27901FD-465E-4AB2-821A-3BC7AF658D26}
+	EndGlobalSection
+EndGlobal

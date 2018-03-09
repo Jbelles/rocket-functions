@@ -1,0 +1,11 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=rocketfunctions;AccountKey=MKjknAlXPn7oPL90hBU6DAtSYw6dAUwU2EPnFqacm1pvTO4aHEZKceU/AhYS5jHiK3GYzonQkV8xCd4vsVxLaQ==",
+    "AzureWebJobsDashboard": "DefaultEndpointsProtocol=https;AccountName=rocketfunctions;AccountKey=MKjknAlXPn7oPL90hBU6DAtSYw6dAUwU2EPnFqacm1pvTO4aHEZKceU/AhYS5jHiK3GYzonQkV8xCd4vsVxLaQ=="
+  },
+  "Host": {
+    "LocalHttpPort": 5858,
+    "CORS": "*"
+  }
+}
