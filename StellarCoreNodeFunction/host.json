@@ -1,4 +1,0 @@
-// Full list here: https://docs.microsoft.com/en-us/azure/azure-functions/functions-host-json
-{
-  "functions": [ "StellarCoreNode" ] // Removing this will run all the functions. Add select functions you want to run here
-}
