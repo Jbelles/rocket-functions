@@ -1,4 +1,0 @@
-// Full list here: https://docs.microsoft.com/en-us/azure/azure-functions/functions-host-json
-{
-  "functions": [ "InflationStreamFunction" ] // Removing this will run all the functions. Add select functions you want to run here
-}

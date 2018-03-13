@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rocket.Api", "rocket-wallet
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rocket.Common", "Rocket.Common\Rocket.Common.csproj", "{AF045819-E923-439F-BBA4-34C25591AD55}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OperationStream", "InflationConsole\OperationStream.csproj", "{C22A1547-6F2F-47E6-8E49-B7CE4CF6CFD7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rocket.Functions", "InflationConsole\Rocket.Functions.csproj", "{C22A1547-6F2F-47E6-8E49-B7CE4CF6CFD7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
